@@ -26,6 +26,8 @@ const MainContent = () => {
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [activeInvoiceOrder, setActiveInvoiceOrder] = useState(null);
 
+  const [mobileOpen, setMobileOpen] = useState(false);
+
   // Direct Order Submission Flow State
   const [orderStep, setOrderStep] = useState(null); // null | 'config' | 'summary'
   const [uploadedFileData, setUploadedFileData] = useState(null);
@@ -87,6 +89,8 @@ const MainContent = () => {
         }}
         onOpenUploadModal={() => setIsUploadModalOpen(true)}
         onOpenSupabaseModal={() => setIsSupabaseModalOpen(true)}
+        mobileOpen={mobileOpen}
+        setMobileOpen={setMobileOpen}
       />
 
       {/* Main Content Area */}
@@ -94,6 +98,7 @@ const MainContent = () => {
         <HeaderBar
           onOpenAuthModal={() => setIsAuthModalOpen(true)}
           onOpenSupabaseModal={() => setIsSupabaseModalOpen(true)}
+          onToggleMobileMenu={() => setMobileOpen(!mobileOpen)}
         />
 
         <main className="flex-1">

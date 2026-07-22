@@ -8,35 +8,51 @@ import {
   LogOut, 
   Printer,
   ShieldAlert,
-  Zap
+  Zap,
+  X
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
-export const Sidebar = ({ activeTab, setActiveTab, onOpenUploadModal, onOpenSupabaseModal }) => {
+export const Sidebar = ({ activeTab, setActiveTab, onOpenUploadModal, onOpenSupabaseModal, mobileOpen, setMobileOpen }) => {
   const { logout } = useAuth();
 
-  return (
-    <aside className="w-64 bg-[#111827] border-r border-[#232d3f] flex flex-col justify-between shrink-0 min-h-screen p-6 select-none">
-      
+  const handleNavClick = (tab) => {
+    setActiveTab(tab);
+    if (setMobileOpen) setMobileOpen(false);
+  };
+
+  const navContent = (
+    <div className="h-full flex flex-col justify-between p-6 select-none">
       <div className="space-y-8">
-        {/* Brand Logo */}
-        <div 
-          onClick={() => setActiveTab('dashboard')}
-          className="flex items-center gap-3 cursor-pointer group px-2"
-        >
-          <div className="w-10 h-10 rounded-xl bg-brand-500 text-white flex items-center justify-center shadow-purple-glow group-hover:scale-105 transition-transform">
-            <Printer className="w-6 h-6 stroke-[2.5]" />
+        {/* Brand Logo & Mobile Close */}
+        <div className="flex items-center justify-between">
+          <div 
+            onClick={() => handleNavClick('dashboard')}
+            className="flex items-center gap-3 cursor-pointer group px-2"
+          >
+            <div className="w-10 h-10 rounded-xl bg-brand-500 text-white flex items-center justify-center shadow-purple-glow group-hover:scale-105 transition-transform">
+              <Printer className="w-6 h-6 stroke-[2.5]" />
+            </div>
+            <span className="text-2xl font-black tracking-tight text-white">
+              Printf<span className="text-brand-500">.</span>
+            </span>
           </div>
-          <span className="text-2xl font-black tracking-tight text-white">
-            Printf<span className="text-brand-500">.</span>
-          </span>
+
+          {/* Close button on mobile */}
+          {setMobileOpen && (
+            <button 
+              onClick={() => setMobileOpen(false)}
+              className="lg:hidden p-2 text-slate-400 hover:text-white rounded-xl hover:bg-slate-800"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          )}
         </div>
 
         {/* Navigation Menu */}
         <nav className="space-y-1.5">
-          
           <button
-            onClick={() => setActiveTab('dashboard')}
+            onClick={() => handleNavClick('dashboard')}
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-xs font-bold transition-all ${
               activeTab === 'dashboard'
                 ? 'sidebar-item-active'
@@ -48,15 +64,18 @@ export const Sidebar = ({ activeTab, setActiveTab, onOpenUploadModal, onOpenSupa
           </button>
 
           <button
-            onClick={onOpenUploadModal}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-xs font-bold text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all`}
+            onClick={() => {
+              if (setMobileOpen) setMobileOpen(false);
+              onOpenUploadModal();
+            }}
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-xs font-bold text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all"
           >
-            <UploadCloud className="w-4 h-4" />
+            <UploadCloud className="w-4 h-4 text-brand-500" />
             <span>Upload Document</span>
           </button>
 
           <button
-            onClick={() => setActiveTab('my_orders')}
+            onClick={() => handleNavClick('my_orders')}
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-xs font-bold transition-all ${
               activeTab === 'my_orders'
                 ? 'sidebar-item-active'
@@ -68,7 +87,7 @@ export const Sidebar = ({ activeTab, setActiveTab, onOpenUploadModal, onOpenSupa
           </button>
 
           <button
-            onClick={() => setActiveTab('admin_operator')}
+            onClick={() => handleNavClick('admin_operator')}
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-xs font-bold transition-all ${
               activeTab === 'admin_operator'
                 ? 'sidebar-item-active'
@@ -80,15 +99,18 @@ export const Sidebar = ({ activeTab, setActiveTab, onOpenUploadModal, onOpenSupa
           </button>
 
           <button
-            onClick={onOpenSupabaseModal}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-xs font-bold text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all`}
+            onClick={() => {
+              if (setMobileOpen) setMobileOpen(false);
+              onOpenSupabaseModal();
+            }}
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-xs font-bold text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all"
           >
             <Zap className="w-4 h-4 text-emerald-400" />
             <span>Supabase Sync</span>
           </button>
 
           <button
-            onClick={() => setActiveTab('profile')}
+            onClick={() => handleNavClick('profile')}
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-xs font-bold transition-all ${
               activeTab === 'profile'
                 ? 'sidebar-item-active'
@@ -100,7 +122,7 @@ export const Sidebar = ({ activeTab, setActiveTab, onOpenUploadModal, onOpenSupa
           </button>
 
           <button
-            onClick={() => setActiveTab('support')}
+            onClick={() => handleNavClick('support')}
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-xs font-bold transition-all ${
               activeTab === 'support'
                 ? 'sidebar-item-active'
@@ -110,7 +132,6 @@ export const Sidebar = ({ activeTab, setActiveTab, onOpenUploadModal, onOpenSupa
             <HelpCircle className="w-4 h-4" />
             <span>Support</span>
           </button>
-
         </nav>
       </div>
 
@@ -124,7 +145,28 @@ export const Sidebar = ({ activeTab, setActiveTab, onOpenUploadModal, onOpenSupa
           <span>Logout</span>
         </button>
       </div>
+    </div>
+  );
 
-    </aside>
+  return (
+    <>
+      {/* Desktop Sidebar */}
+      <aside className="hidden lg:flex w-64 bg-[#111827] border-r border-[#232d3f] flex-col shrink-0 min-h-screen">
+        {navContent}
+      </aside>
+
+      {/* Mobile Drawer Overlay */}
+      {mobileOpen && (
+        <div className="lg:hidden fixed inset-0 z-50 flex">
+          <div 
+            className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm transition-opacity"
+            onClick={() => setMobileOpen(false)}
+          />
+          <div className="relative w-72 bg-[#111827] border-r border-[#232d3f] h-full shadow-2xl z-10">
+            {navContent}
+          </div>
+        </div>
+      )}
+    </>
   );
 };

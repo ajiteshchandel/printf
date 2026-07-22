@@ -58,7 +58,7 @@ export const LoginPage = ({ onLoginSuccess, onOpenSupabaseModal }) => {
     <div className="min-h-screen w-full bg-[#0b0f19] text-slate-100 flex flex-col lg:flex-row font-sans selection:bg-brand-500 selection:text-white">
       
       {/* LEFT PANEL - Brand & Spline 3D Showcase */}
-      <div className="lg:w-1/2 bg-[#111827] border-b lg:border-b-0 lg:border-r border-[#232d3f] p-8 sm:p-12 lg:p-16 flex flex-col justify-between relative overflow-hidden">
+      <div className="lg:w-1/2 bg-[#111827] border-b lg:border-b-0 lg:border-r border-[#232d3f] p-6 sm:p-12 lg:p-16 flex flex-col justify-between relative overflow-hidden">
         
         {/* Glow ambient background orbs */}
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-brand-500/10 blur-[130px] rounded-full pointer-events-none" />
@@ -74,17 +74,17 @@ export const LoginPage = ({ onLoginSuccess, onOpenSupabaseModal }) => {
         </div>
 
         {/* Hero Content */}
-        <div className="my-8 space-y-6 max-w-lg relative z-10 text-left">
-          <h1 className="text-4xl sm:text-5xl font-black text-white leading-tight">
+        <div className="my-6 sm:my-8 space-y-4 sm:space-y-6 max-w-lg relative z-10 text-left">
+          <h1 className="text-3xl sm:text-5xl font-black text-white leading-tight">
             Print Smarter. <br />
             <span className="text-brand-500">Upload. Print.</span> Done.
           </h1>
-          <p className="text-sm text-slate-300 leading-relaxed font-medium">
+          <p className="text-xs sm:text-sm text-slate-300 leading-relaxed font-medium">
             Upload your documents, choose your preferences and collect your prints hassle-free.
           </p>
 
-          {/* 3D Spline Scene Container (Watermark Cropped) */}
-          <div className="relative w-full h-64 sm:h-72 my-6 flex items-center justify-center overflow-hidden rounded-3xl border border-indigo-500/20 bg-slate-950/60 shadow-2xl">
+          {/* 3D Spline Scene Container (Watermark Cropped & Responsive Width) */}
+          <div className="relative w-full max-w-sm mx-auto h-52 sm:h-72 my-4 sm:my-6 flex items-center justify-center overflow-hidden rounded-3xl border border-indigo-500/20 bg-slate-950/60 shadow-2xl">
             <div className="w-full h-full scale-[1.08] relative overflow-hidden flex items-center justify-center">
               <Suspense fallback={
                 <div className="w-full h-full flex flex-col items-center justify-center text-xs text-slate-400 gap-2">
