@@ -32,7 +32,7 @@ export const HeaderBar = ({ onOpenAuthModal, onToggleMobileMenu }) => {
           <span className={`px-3.5 py-1.5 rounded-full text-xs font-black tracking-wide uppercase flex items-center gap-2 border transition-all ${
             currentUser?.role === 'admin'
               ? 'bg-amber-500/15 text-amber-300 border-amber-500/40 shadow-lg shadow-amber-500/20'
-              : 'bg-brand-500/15 text-brand-300 border-brand-500/40 shadow-purple-glow'
+              : 'bg-brand-500/20 text-white border-brand-500/40 shadow-purple-glow'
           }`}>
             {currentUser?.role === 'admin' ? (
               <>
@@ -41,8 +41,8 @@ export const HeaderBar = ({ onOpenAuthModal, onToggleMobileMenu }) => {
               </>
             ) : (
               <>
-                <User className="w-4 h-4 text-brand-400" />
-                <span>Customer Mode</span>
+                <User className="w-4 h-4 text-white" />
+                <span className="text-white">Customer Mode</span>
               </>
             )}
           </span>
