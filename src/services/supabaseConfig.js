@@ -1,13 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 
-export const getStoredSupabaseConfig = () => {
-  const envUrl = import.meta.env.VITE_SUPABASE_URL;
-  const envKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-
-  if (envUrl && envUrl !== 'your_supabase_project_url' && envKey) {
-    return { supabaseUrl: envUrl, supabaseAnonKey: envKey };
-  }
-
+export const getCustomSupabaseConfig = () => {
   const custom = localStorage.getItem('printf_supabase_config');
   if (custom) {
     try {
@@ -15,6 +8,19 @@ export const getStoredSupabaseConfig = () => {
     } catch (e) {
       console.error("Invalid custom Supabase config stored", e);
     }
+  }
+  return null;
+};
+
+export const getStoredSupabaseConfig = () => {
+  const custom = getCustomSupabaseConfig();
+  if (custom) return custom;
+
+  const envUrl = import.meta.env.VITE_SUPABASE_URL;
+  const envKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+  if (envUrl && envUrl !== 'your_supabase_project_url' && envKey) {
+    return { supabaseUrl: envUrl, supabaseAnonKey: envKey };
   }
 
   return null;
@@ -39,13 +45,9 @@ if (config && config.supabaseUrl && config.supabaseAnonKey) {
   try {
     supabase = createClient(config.supabaseUrl, config.supabaseAnonKey);
     isSupabaseActive = true;
-    console.log("⚡ Connected live to Supabase project:", config.supabaseUrl);
   } catch (error) {
-    console.warn("⚠️ Failed to initialize Supabase client:", error.message);
     isSupabaseActive = false;
   }
-} else {
-  console.log("ℹ️ Running in Printf Demo Mode. Connect Supabase anytime in header settings.");
 }
 
 export { supabase, isSupabaseActive };

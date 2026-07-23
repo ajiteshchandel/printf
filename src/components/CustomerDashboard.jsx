@@ -131,7 +131,7 @@ export const CustomerDashboard = ({ onOpenUploadModal, onViewInvoice }) => {
 
         {loadingOrders ? (
           <div className="text-center py-12 text-slate-400 text-xs flex items-center justify-center gap-2">
-            <RefreshCw className="w-4 h-4 animate-spin text-emerald-400" /> Syncing Supabase real-time orders...
+            <RefreshCw className="w-4 h-4 animate-spin text-emerald-400" /> Syncing real-time orders...
           </div>
         ) : filteredOrders.length === 0 ? (
           <div className="text-center py-16 border-2 border-dashed border-slate-800/80 rounded-3xl space-y-3">

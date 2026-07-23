@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { OrderProvider, useOrders } from './context/OrderContext';
 import { Sidebar } from './components/Sidebar';
@@ -6,30 +7,78 @@ import { HeaderBar } from './components/HeaderBar';
 import { DashboardView } from './components/DashboardView';
 import { CustomerDashboard } from './components/CustomerDashboard';
 import { AdminDashboard } from './components/AdminDashboard';
-import { LoginPage } from './components/LoginPage';
+import { CustomerLoginPage } from './components/CustomerLoginPage';
+import { AdminLoginPage } from './components/AdminLoginPage';
+import { ProtectedRoute } from './components/ProtectedRoute';
 import { UploadModal } from './components/UploadModal';
 import { PrintConfigurator } from './components/PrintConfigurator';
 import { OrderSummaryModal } from './components/OrderSummaryModal';
 import { AuthModal } from './components/AuthModal';
-import { SupabaseConfigModal } from './components/SupabaseConfigModal';
 import { InvoiceModal } from './components/InvoiceModal';
 import { Toast } from './components/Toast';
 
-const MainContent = () => {
+// Component that redirects root '/' or wildcard paths based on role
+const RootRedirect = () => {
+  const { currentUser, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#0b0f19] flex items-center justify-center text-slate-400">
+        <div className="w-8 h-8 border-3 border-brand-500 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (!currentUser) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (currentUser.role === 'admin') {
+    return <Navigate to="/admin/dashboard" replace />;
+  }
+
+  return <Navigate to="/customer/dashboard" replace />;
+};
+
+const MainLayout = ({ initialTab = 'dashboard' }) => {
   const { currentUser } = useAuth();
   const { createOrder } = useOrders();
-  const [activeTab, setActiveTab] = useState('dashboard'); // 'dashboard' | 'my_orders' | 'admin_operator' | 'profile' | 'support' | 'login'
-  
-  // Modals state
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const [activeTab, setActiveTab] = useState(initialTab);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const [isSupabaseModalOpen, setIsSupabaseModalOpen] = useState(false);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [activeInvoiceOrder, setActiveInvoiceOrder] = useState(null);
-
   const [mobileOpen, setMobileOpen] = useState(false);
 
+  // Sync tab with URL
+  useEffect(() => {
+    if (location.pathname.startsWith('/admin/dashboard')) {
+      setActiveTab('admin_operator');
+    } else if (location.pathname.startsWith('/customer/my-orders')) {
+      setActiveTab('my_orders');
+    } else if (location.pathname.startsWith('/customer/dashboard')) {
+      setActiveTab('dashboard');
+    } else {
+      setActiveTab(initialTab);
+    }
+  }, [location.pathname, initialTab]);
+
+  // Navigation click handler syncing state & URL
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+    if (tab === 'admin_operator') {
+      navigate('/admin/dashboard');
+    } else if (tab === 'my_orders') {
+      navigate('/customer/my-orders');
+    } else if (tab === 'dashboard') {
+      navigate('/customer/dashboard');
+    }
+  };
+
   // Direct Order Submission Flow State
-  const [orderStep, setOrderStep] = useState(null); // null | 'config' | 'summary'
+  const [orderStep, setOrderStep] = useState(null);
   const [uploadedFileData, setUploadedFileData] = useState(null);
   const [configuredData, setConfiguredData] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -54,28 +103,11 @@ const MainContent = () => {
       });
       setIsSubmitting(false);
       setOrderStep(null);
-      setActiveTab('my_orders');
+      handleTabChange('my_orders');
     } catch (err) {
       setIsSubmitting(false);
     }
   };
-
-  // If user is logged out or explicitly on the login screen, show the Split-Screen LoginPage!
-  if (!currentUser || activeTab === 'login') {
-    return (
-      <>
-        <LoginPage
-          onLoginSuccess={() => setActiveTab('dashboard')}
-          onOpenSupabaseModal={() => setIsSupabaseModalOpen(true)}
-        />
-        <SupabaseConfigModal
-          isOpen={isSupabaseModalOpen}
-          onClose={() => setIsSupabaseModalOpen(false)}
-        />
-        <Toast />
-      </>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-surface-bg flex font-sans text-slate-900 selection:bg-brand-500 selection:text-white">
@@ -83,12 +115,8 @@ const MainContent = () => {
       {/* Left Sidebar */}
       <Sidebar
         activeTab={activeTab}
-        setActiveTab={(tab) => {
-          setOrderStep(null);
-          setActiveTab(tab);
-        }}
+        setActiveTab={handleTabChange}
         onOpenUploadModal={() => setIsUploadModalOpen(true)}
-        onOpenSupabaseModal={() => setIsSupabaseModalOpen(true)}
         mobileOpen={mobileOpen}
         setMobileOpen={setMobileOpen}
       />
@@ -97,7 +125,6 @@ const MainContent = () => {
       <div className="flex-1 flex flex-col min-w-0 overflow-y-auto">
         <HeaderBar
           onOpenAuthModal={() => setIsAuthModalOpen(true)}
-          onOpenSupabaseModal={() => setIsSupabaseModalOpen(true)}
           onToggleMobileMenu={() => setMobileOpen(!mobileOpen)}
         />
 
@@ -125,7 +152,7 @@ const MainContent = () => {
             <DashboardView
               onOpenUploadModal={() => setIsUploadModalOpen(true)}
               onViewInvoice={(order) => setActiveInvoiceOrder(order)}
-              setActiveTab={setActiveTab}
+              setActiveTab={handleTabChange}
             />
           )}
 
@@ -137,7 +164,20 @@ const MainContent = () => {
           )}
 
           {!orderStep && activeTab === 'admin_operator' && (
-            <AdminDashboard />
+            currentUser?.role === 'admin' ? (
+              <AdminDashboard />
+            ) : (
+              <div className="p-12 text-center text-slate-400 space-y-4">
+                <h2 className="text-2xl font-bold text-rose-400">403 - Access Denied</h2>
+                <p className="text-xs">Admin privileges are required to view the Operator Terminal.</p>
+                <button
+                  onClick={() => handleTabChange('dashboard')}
+                  className="px-4 py-2 text-xs font-bold bg-slate-800 hover:bg-slate-700 text-white rounded-xl"
+                >
+                  Return to Dashboard
+                </button>
+              </div>
+            )
           )}
 
           {!orderStep && (activeTab === 'profile' || activeTab === 'support') && (
@@ -161,11 +201,6 @@ const MainContent = () => {
         onClose={() => setIsAuthModalOpen(false)}
       />
 
-      <SupabaseConfigModal
-        isOpen={isSupabaseModalOpen}
-        onClose={() => setIsSupabaseModalOpen(false)}
-      />
-
       <InvoiceModal
         isOpen={!!activeInvoiceOrder}
         order={activeInvoiceOrder}
@@ -181,7 +216,45 @@ export default function App() {
   return (
     <AuthProvider>
       <OrderProvider>
-        <MainContent />
+        <BrowserRouter>
+          <Routes>
+            {/* Public Dedicated Authentication Portals */}
+            <Route path="/login" element={<CustomerLoginPage />} />
+            <Route path="/admin/login" element={<AdminLoginPage />} />
+
+            {/* Protected Customer Routes */}
+            <Route 
+              path="/customer/dashboard" 
+              element={
+                <ProtectedRoute allowedRoles={['customer', 'admin']}>
+                  <MainLayout initialTab="dashboard" />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/customer/my-orders" 
+              element={
+                <ProtectedRoute allowedRoles={['customer', 'admin']}>
+                  <MainLayout initialTab="my_orders" />
+                </ProtectedRoute>
+              } 
+            />
+
+            {/* Protected Admin Routes */}
+            <Route 
+              path="/admin/dashboard" 
+              element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <MainLayout initialTab="admin_operator" />
+                </ProtectedRoute>
+              } 
+            />
+
+            {/* Fallback & Root Redirection */}
+            <Route path="/" element={<RootRedirect />} />
+            <Route path="*" element={<RootRedirect />} />
+          </Routes>
+        </BrowserRouter>
       </OrderProvider>
     </AuthProvider>
   );

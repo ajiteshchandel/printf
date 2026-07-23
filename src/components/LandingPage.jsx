@@ -20,8 +20,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
-export const LandingPage = ({ onOpenUploadModal, onOpenSupabaseModal }) => {
-  const { isSupabaseActive } = useAuth();
+export const LandingPage = ({ onOpenUploadModal }) => {
   
   // Interactive Price Calculator state
   const [calcPages, setCalcPages] = useState(15);
@@ -113,7 +112,7 @@ export const LandingPage = ({ onOpenUploadModal, onOpenSupabaseModal }) => {
           <div className="pt-8 flex flex-wrap items-center justify-center gap-6 sm:gap-12 text-xs text-slate-400 font-medium">
             <div className="flex items-center gap-2">
               <ShieldCheck className="w-4 h-4 text-emerald-400" />
-              <span>100% Secure Supabase Storage</span>
+              <span>100% Secure Cloud Storage</span>
             </div>
             <div className="flex items-center gap-2">
               <Clock className="w-4 h-4 text-violet-400" />
@@ -180,7 +179,7 @@ export const LandingPage = ({ onOpenUploadModal, onOpenSupabaseModal }) => {
                 <Upload className="w-5 h-5 text-emerald-400" /> Upload Document
               </h3>
               <p className="text-slate-400 text-sm leading-relaxed">
-                Drag and drop your document file. Files upload directly to your Supabase Cloud Storage bucket (`printf`) with full encryption.
+                Drag and drop your document file. Files upload directly to encrypted Cloud Storage with full security.
               </p>
             </div>
 

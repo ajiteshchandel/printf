@@ -178,7 +178,7 @@ export const DashboardView = ({ onOpenUploadModal, onViewInvoice, setActiveTab }
                   <Zap className="w-5 h-5" />
                 </div>
                 <h4 className="text-xs font-bold text-white">Direct Cloud Upload</h4>
-                <p className="text-[11px] text-slate-400 leading-relaxed">Synced directly to your Supabase Cloud storage.</p>
+                <p className="text-[11px] text-slate-400 leading-relaxed">Synced directly to encrypted Cloud storage.</p>
               </div>
 
               <div className="p-4 sm:p-5 rounded-2xl bg-[#111827] border border-[#232d3f] space-y-2 text-left">

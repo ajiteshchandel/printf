@@ -19,17 +19,36 @@ import {
   ExternalLink,
   Flame
 } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 import { useOrders } from '../context/OrderContext';
 
 const STATUS_LIST = ['All', 'Order Confirmed', 'File Received', 'Printing', 'Ready for Collection', 'Completed', 'Cancelled'];
 
 export const AdminDashboard = () => {
+  const { currentUser } = useAuth();
   const { orders, loadingOrders, updateOrderStatus } = useOrders();
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [statusFilter, setStatusFilter] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
   const [adminRemarkInput, setAdminRemarkInput] = useState('');
   const [updating, setUpdating] = useState(false);
+
+  // Authorization Check
+  if (currentUser?.role !== 'admin') {
+    return (
+      <div className="max-w-4xl mx-auto px-4 py-20 text-center space-y-6">
+        <div className="w-16 h-16 bg-rose-500/10 text-rose-400 border border-rose-500/20 rounded-3xl flex items-center justify-center mx-auto">
+          <ShieldAlert className="w-8 h-8" />
+        </div>
+        <div className="space-y-2">
+          <h2 className="text-3xl font-extrabold text-white">403 - Access Denied</h2>
+          <p className="text-sm text-slate-400 max-w-md mx-auto">
+            You do not have permission to view the Shop Operator Terminal. This section is restricted exclusively to authorized Printing Shop Admins.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   // Operator stats
   const totalCount = orders.length;

@@ -12,8 +12,8 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
-export const Navbar = ({ activeTab, setActiveTab, onOpenAuthModal, onOpenUploadModal, onOpenSupabaseModal }) => {
-  const { currentUser, logout, switchRole, isSupabaseActive } = useAuth();
+export const Navbar = ({ activeTab, setActiveTab, onOpenAuthModal, onOpenUploadModal }) => {
+  const { currentUser, logout, switchRole } = useAuth();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [visible, setVisible] = useState(true);
   const [prevScrollPos, setPrevScrollPos] = useState(0);
@@ -38,64 +38,6 @@ export const Navbar = ({ activeTab, setActiveTab, onOpenAuthModal, onOpenUploadM
     <header className={`fixed top-0 left-0 right-0 z-50 w-full border-b border-slate-800/80 bg-cyber-950/90 backdrop-blur-2xl transition-transform duration-300 ease-in-out ${
       visible ? 'translate-y-0' : '-translate-y-full'
     }`}>
-      {/* Top Banner: Role & Mode Switcher */}
-      <div className="w-full bg-slate-900/90 border-b border-slate-800/60 px-4 py-1.5 flex flex-wrap items-center justify-between text-xs text-slate-300">
-        <div className="flex items-center gap-3">
-          <span className="font-semibold text-slate-400 flex items-center gap-1.5">
-            <Sparkles className="w-3.5 h-3.5 text-indigo-400" /> Interactive Quick Switch:
-          </span>
-          <div className="flex items-center bg-slate-950/80 p-0.5 rounded-lg border border-slate-800">
-            <button
-              onClick={() => {
-                switchRole('customer');
-                setActiveTab('customer_dashboard');
-              }}
-              className={`px-3 py-1 rounded-md font-medium text-xs transition-all flex items-center gap-1.5 ${
-                currentUser?.role === 'customer'
-                  ? 'bg-indigo-600 text-white shadow-sm'
-                  : 'text-slate-400 hover:text-slate-200'
-              }`}
-            >
-              <User className="w-3 h-3" /> Customer View
-            </button>
-            <button
-              onClick={() => {
-                switchRole('admin');
-                setActiveTab('admin_dashboard');
-              }}
-              className={`px-3 py-1 rounded-md font-medium text-xs transition-all flex items-center gap-1.5 ${
-                currentUser?.role === 'admin'
-                  ? 'bg-amber-600 text-white shadow-sm'
-                  : 'text-slate-400 hover:text-slate-200'
-              }`}
-            >
-              <ShieldAlert className="w-3 h-3" /> Admin Operator View
-            </button>
-          </div>
-        </div>
-
-        {/* Connection Status indicator */}
-        <div className="flex items-center gap-2">
-          {isSupabaseActive ? (
-            <button
-              onClick={onOpenSupabaseModal}
-              className="px-2.5 py-1 text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 rounded-full flex items-center gap-1.5 hover:bg-emerald-500/20 transition-all"
-            >
-              <Zap className="w-3.5 h-3.5 text-emerald-400 fill-current animate-pulse" />
-              <span>Supabase Live Connected</span>
-            </button>
-          ) : (
-            <button
-              onClick={onOpenSupabaseModal}
-              className="px-2.5 py-1 text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 rounded-full flex items-center gap-1.5 hover:bg-emerald-500/20 transition-all group"
-            >
-              <Zap className="w-3.5 h-3.5 text-emerald-400 group-hover:scale-110 transition-transform" />
-              <span>Offline Mode (Click to Connect Supabase)</span>
-            </button>
-          )}
-        </div>
-      </div>
-
       {/* Main Navbar */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
@@ -109,7 +51,7 @@ export const Navbar = ({ activeTab, setActiveTab, onOpenAuthModal, onOpenUploadM
             </div>
             <div>
               <span className="text-xl font-extrabold tracking-tight text-white flex items-center gap-1">
-                Printf <span className="text-xs px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-medium">v1.0</span>
+                Printf
               </span>
               <span className="text-[10px] text-slate-400 block -mt-0.5">Online Printing Platform</span>
             </div>
@@ -137,16 +79,18 @@ export const Navbar = ({ activeTab, setActiveTab, onOpenAuthModal, onOpenUploadM
             >
               <LayoutDashboard className="w-4 h-4" /> Customer Dashboard
             </button>
-            <button
-              onClick={() => setActiveTab('admin_dashboard')}
-              className={`px-4 py-2 rounded-xl text-sm font-medium transition-all flex items-center gap-2 ${
-                activeTab === 'admin_dashboard' 
-                  ? 'bg-slate-800 text-amber-300 shadow-inner' 
-                  : 'text-slate-400 hover:text-amber-200 hover:bg-slate-900'
-              }`}
-            >
-              <ShieldAlert className="w-4 h-4 text-amber-400" /> Admin Operator
-            </button>
+            {currentUser?.role === 'admin' && (
+              <button
+                onClick={() => setActiveTab('admin_operator')}
+                className={`px-4 py-2 rounded-xl text-sm font-medium transition-all flex items-center gap-2 ${
+                  activeTab === 'admin_operator' 
+                    ? 'bg-slate-800 text-amber-300 shadow-inner' 
+                    : 'text-slate-400 hover:text-amber-200 hover:bg-slate-900'
+                }`}
+              >
+                <ShieldAlert className="w-4 h-4 text-amber-400" /> Admin Operator
+              </button>
+            )}
           </nav>
 
           {/* Actions & User */}
@@ -184,16 +128,6 @@ export const Navbar = ({ activeTab, setActiveTab, onOpenAuthModal, onOpenUploadM
                         {currentUser.role}
                       </span>
                     </div>
-
-                    <button
-                      onClick={() => {
-                        setDropdownOpen(false);
-                        onOpenSupabaseModal();
-                      }}
-                      className="w-full text-left px-3 py-2 text-xs text-slate-300 hover:bg-slate-800 rounded-xl flex items-center gap-2 transition-colors"
-                    >
-                      <Zap className="w-4 h-4 text-emerald-400" /> Supabase Settings
-                    </button>
 
                     <button
                       onClick={() => {

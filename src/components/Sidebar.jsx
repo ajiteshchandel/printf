@@ -14,7 +14,7 @@ import {
 import { useAuth } from '../context/AuthContext';
 
 export const Sidebar = ({ activeTab, setActiveTab, onOpenUploadModal, onOpenSupabaseModal, mobileOpen, setMobileOpen }) => {
-  const { logout } = useAuth();
+  const { currentUser, logout } = useAuth();
 
   const handleNavClick = (tab) => {
     setActiveTab(tab);
@@ -86,28 +86,21 @@ export const Sidebar = ({ activeTab, setActiveTab, onOpenUploadModal, onOpenSupa
             <span>My Orders</span>
           </button>
 
-          <button
-            onClick={() => handleNavClick('admin_operator')}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-xs font-bold transition-all ${
-              activeTab === 'admin_operator'
-                ? 'sidebar-item-active'
-                : 'text-amber-400 hover:bg-amber-500/10'
-            }`}
-          >
-            <ShieldAlert className="w-4 h-4 text-amber-400" />
-            <span>Operator Terminal</span>
-          </button>
-
-          <button
-            onClick={() => {
-              if (setMobileOpen) setMobileOpen(false);
-              onOpenSupabaseModal();
-            }}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-xs font-bold text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all"
-          >
-            <Zap className="w-4 h-4 text-emerald-400" />
-            <span>Supabase Sync</span>
-          </button>
+          {currentUser?.role === 'admin' && (
+            <>
+              <button
+                onClick={() => handleNavClick('admin_operator')}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-xs font-bold transition-all ${
+                  activeTab === 'admin_operator'
+                    ? 'sidebar-item-active'
+                    : 'text-amber-400 hover:bg-amber-500/10'
+                }`}
+              >
+                <ShieldAlert className="w-4 h-4 text-amber-400" />
+                <span>Operator Terminal</span>
+              </button>
+            </>
+          )}
 
           <button
             onClick={() => handleNavClick('profile')}

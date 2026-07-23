@@ -8,20 +8,22 @@ import {
   ShieldCheck, 
   UploadCloud, 
   Zap, 
-  ArrowRight,
-  User,
-  Phone,
-  Check,
-  AlertCircle
+  User, 
+  Phone, 
+  AlertCircle,
+  ShieldAlert
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 // Lazy load 3D Spline Scene
 const Spline = lazy(() => import('@splinetool/react-spline'));
 
-export const LoginPage = ({ onLoginSuccess, onOpenSupabaseModal }) => {
-  const { login, register, loginWithGoogle, loading, authError, isSupabaseActive } = useAuth();
+export const LoginPage = ({ onLoginSuccess }) => {
+  const { login, register, loginWithGoogle, loading, authError } = useAuth();
   
+  // Portal Tab: 'customer' | 'admin'
+  const [loginPortal, setLoginPortal] = useState('customer');
+
   const [isRegisterMode, setIsRegisterMode] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
@@ -31,13 +33,31 @@ export const LoginPage = ({ onLoginSuccess, onOpenSupabaseModal }) => {
   const [email, setEmail] = useState('customer@printf.com');
   const [password, setPassword] = useState('demo12345');
   const [phone, setPhone] = useState('');
-  const [role, setRole] = useState('customer');
+  const [adminPasscode, setAdminPasscode] = useState('');
+  const [passcodeError, setPasscodeError] = useState('');
+
+  const handlePortalSwitch = (portal) => {
+    setLoginPortal(portal);
+    setIsRegisterMode(false);
+    setPasscodeError('');
+    if (portal === 'admin') {
+      setEmail('admin@printf.com');
+    } else {
+      setEmail('customer@printf.com');
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setPasscodeError('');
     try {
       if (isRegisterMode) {
-        await register({ name, email, password, phone, role });
+        const userRole = loginPortal === 'admin' ? 'admin' : 'customer';
+        if (userRole === 'admin' && adminPasscode !== 'admin123' && adminPasscode !== 'PRINTF_ADMIN_2026') {
+          setPasscodeError('Invalid Admin Security Passcode! Operator key required.');
+          return;
+        }
+        await register({ name, email, password, phone, role: userRole });
       } else {
         await login(email, password);
       }
@@ -83,7 +103,7 @@ export const LoginPage = ({ onLoginSuccess, onOpenSupabaseModal }) => {
             Upload your documents, choose your preferences and collect your prints hassle-free.
           </p>
 
-          {/* 3D Spline Scene Container (Watermark Cropped & Responsive Width) */}
+          {/* 3D Spline Scene Container */}
           <div className="relative w-full max-w-sm mx-auto h-52 sm:h-72 my-4 sm:my-6 flex items-center justify-center overflow-hidden rounded-3xl border border-indigo-500/20 bg-slate-950/60 shadow-2xl">
             <div className="w-full h-full scale-[1.08] relative overflow-hidden flex items-center justify-center">
               <Suspense fallback={
@@ -127,188 +147,317 @@ export const LoginPage = ({ onLoginSuccess, onOpenSupabaseModal }) => {
 
       </div>
 
-      {/* RIGHT PANEL - Dark Theme Form Card & Authentication */}
-      <div className="lg:w-1/2 p-8 sm:p-12 lg:p-16 flex flex-col justify-between items-center relative">
+      {/* RIGHT PANEL - Authentication & Admin Portal Switcher */}
+      <div className="lg:w-1/2 p-8 sm:p-12 lg:p-16 flex flex-col justify-between items-center relative overflow-y-auto">
         
-        {/* Top Bar: Connection & Mode indicator */}
-        <div className="w-full flex justify-between items-center pb-6">
-          <button
-            onClick={onOpenSupabaseModal}
-            className="px-3 py-1.5 text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 rounded-full flex items-center gap-1.5 hover:bg-emerald-500/20 transition-all"
-          >
-            <Zap className="w-3.5 h-3.5 fill-current text-emerald-400" />
-            <span>{isSupabaseActive ? 'Connected to Supabase' : 'Offline Demo Mode (Click to Settings)'}</span>
-          </button>
+        {/* Top Header Mode Selector (Customer Sign In vs Admin Portal) */}
+        <div className="w-full max-w-md flex items-center justify-between pb-6">
+          <div className="flex bg-[#111827] p-1 rounded-2xl border border-[#232d3f] w-full">
+            <button
+              onClick={() => handlePortalSwitch('customer')}
+              className={`flex-1 py-2.5 px-4 rounded-xl text-xs font-extrabold transition-all flex items-center justify-center gap-2 ${
+                loginPortal === 'customer'
+                  ? 'bg-brand-500 text-white shadow-purple-glow'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <User className="w-4 h-4" /> Customer Sign In
+            </button>
+            <button
+              onClick={() => handlePortalSwitch('admin')}
+              className={`flex-1 py-2.5 px-4 rounded-xl text-xs font-extrabold transition-all flex items-center justify-center gap-2 ${
+                loginPortal === 'admin'
+                  ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/20'
+                  : 'text-slate-400 hover:text-amber-400'
+              }`}
+            >
+              <ShieldAlert className="w-4 h-4" /> Admin Portal
+            </button>
+          </div>
         </div>
 
-        {/* Form Card (Elevated Dark Card matching reference screenshot) */}
-        <div className="w-full max-w-md saas-card p-8 sm:p-10 space-y-6 shadow-2xl relative my-auto">
-          
-          <div className="text-center space-y-1">
-            <h2 className="text-2xl font-black text-white">
-              {isRegisterMode ? 'Create Account' : 'Welcome Back!'}
-            </h2>
-            <p className="text-xs text-slate-400">
-              {isRegisterMode ? 'Register to start remote document printing' : 'Login to your Printf account'}
-            </p>
-          </div>
-
-          {authError && (
-            <div className="p-3.5 bg-rose-500/10 border border-rose-500/20 rounded-xl text-xs text-rose-300 flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 shrink-0" />
-              <span>{authError}</span>
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit} className="space-y-4 text-left">
+        {/* CUSTOMER LOGIN CARD */}
+        {loginPortal === 'customer' && (
+          <div className="w-full max-w-md saas-card p-8 sm:p-10 space-y-6 shadow-2xl relative my-auto">
             
-            {isRegisterMode && (
+            <div className="text-center space-y-1">
+              <h2 className="text-2xl font-black text-white">
+                {isRegisterMode ? 'Create Customer Account' : 'Welcome Back!'}
+              </h2>
+              <p className="text-xs text-slate-400">
+                {isRegisterMode ? 'Register to start ordering document prints' : 'Sign in to your Printf account'}
+              </p>
+            </div>
+
+            {(authError || passcodeError) && (
+              <div className="p-3.5 bg-rose-500/10 border border-rose-500/20 rounded-xl text-xs text-rose-300 flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 shrink-0" />
+                <span>{passcodeError || authError}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleSubmit} className="space-y-4 text-left">
+              
+              {isRegisterMode && (
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 mb-1.5">Full Name</label>
+                  <div className="relative">
+                    <User className="w-4 h-4 text-slate-500 absolute left-3.5 top-3.5" />
+                    <input
+                      type="text"
+                      required
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder="Enter your full name"
+                      className="w-full text-xs pl-10 pr-4 py-3 bg-[#111827] border border-[#232d3f] rounded-xl text-white outline-none focus:border-brand-500 transition-colors"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Email Address */}
               <div>
-                <label className="block text-xs font-bold text-slate-300 mb-1.5">Full Name</label>
+                <label className="block text-xs font-bold text-slate-300 mb-1.5">Email Address</label>
                 <div className="relative">
-                  <User className="w-4 h-4 text-slate-500 absolute left-3.5 top-3.5" />
+                  <Mail className="w-4 h-4 text-slate-500 absolute left-3.5 top-3.5" />
                   <input
-                    type="text"
+                    type="email"
                     required
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="Enter your full name"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="customer@printf.com"
                     className="w-full text-xs pl-10 pr-4 py-3 bg-[#111827] border border-[#232d3f] rounded-xl text-white outline-none focus:border-brand-500 transition-colors"
                   />
                 </div>
               </div>
-            )}
 
-            {/* Email Address */}
-            <div>
-              <label className="block text-xs font-bold text-slate-300 mb-1.5">Email Address</label>
-              <div className="relative">
-                <Mail className="w-4 h-4 text-slate-500 absolute left-3.5 top-3.5" />
-                <input
-                  type="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Enter your email"
-                  className="w-full text-xs pl-10 pr-4 py-3 bg-[#111827] border border-[#232d3f] rounded-xl text-white outline-none focus:border-brand-500 transition-colors"
-                />
-              </div>
-            </div>
-
-            {/* Password */}
-            <div>
-              <div className="flex justify-between items-center mb-1.5">
-                <label className="text-xs font-bold text-slate-300">Password</label>
-                {!isRegisterMode && (
-                  <button type="button" className="text-[11px] font-bold text-brand-500 hover:underline">
-                    Forgot password?
-                  </button>
-                )}
-              </div>
-              <div className="relative">
-                <Lock className="w-4 h-4 text-slate-500 absolute left-3.5 top-3.5" />
-                <input
-                  type={showPassword ? "text" : "password"}
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Enter your password"
-                  className="w-full text-xs pl-10 pr-10 py-3 bg-[#111827] border border-[#232d3f] rounded-xl text-white outline-none focus:border-brand-500 transition-colors"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3.5 top-3.5 text-slate-500 hover:text-slate-300"
-                >
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
-              </div>
-            </div>
-
-            {isRegisterMode && (
+              {/* Password */}
               <div>
-                <label className="block text-xs font-bold text-slate-300 mb-1.5">Account Role</label>
-                <select
-                  value={role}
-                  onChange={(e) => setRole(e.target.value)}
-                  className="w-full text-xs p-3 bg-[#111827] border border-[#232d3f] rounded-xl text-white outline-none focus:border-brand-500"
-                >
-                  <option value="customer">Customer (Upload & Order Prints)</option>
-                  <option value="admin">Printing Shop Operator (Print & Spool Docs)</option>
-                </select>
+                <div className="flex justify-between items-center mb-1.5">
+                  <label className="text-xs font-bold text-slate-300">Password</label>
+                  {!isRegisterMode && (
+                    <button type="button" className="text-[11px] font-bold text-brand-500 hover:underline">
+                      Forgot password?
+                    </button>
+                  )}
+                </div>
+                <div className="relative">
+                  <Lock className="w-4 h-4 text-slate-500 absolute left-3.5 top-3.5" />
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Enter your password"
+                    className="w-full text-xs pl-10 pr-10 py-3 bg-[#111827] border border-[#232d3f] rounded-xl text-white outline-none focus:border-brand-500 transition-colors"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3.5 top-3.5 text-slate-500 hover:text-slate-300"
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+
+              {/* Remember me */}
+              <div className="flex items-center gap-2 pt-1">
+                <input
+                  type="checkbox"
+                  id="remember-cust"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                  className="w-4 h-4 accent-brand-500 rounded bg-[#111827] border-slate-700 cursor-pointer"
+                />
+                <label htmlFor="remember-cust" className="text-xs font-semibold text-slate-400 cursor-pointer select-none">
+                  Remember me
+                </label>
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full py-3.5 text-sm font-extrabold text-white bg-brand-500 hover:bg-brand-600 rounded-xl shadow-purple-glow transition-all flex items-center justify-center gap-2"
+              >
+                {loading ? (
+                  <span className="animate-pulse">Authenticating...</span>
+                ) : isRegisterMode ? (
+                  <span>Create Account</span>
+                ) : (
+                  <span>Login as Customer</span>
+                )}
+              </button>
+            </form>
+
+            <div className="relative my-4 text-center text-xs text-slate-500">
+              <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-[#232d3f]" /></div>
+              <span className="relative bg-[#161e2e] px-3 font-semibold">or continue with</span>
+            </div>
+
+            <button
+              onClick={handleGoogleAuth}
+              className="w-full py-3 border border-[#232d3f] bg-[#111827] hover:bg-[#1d273a] rounded-xl text-xs font-bold text-slate-200 flex items-center justify-center gap-2.5 transition-all"
+            >
+              <svg className="w-4 h-4" viewBox="0 0 24 24">
+                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+              </svg>
+              <span>Continue with Google</span>
+            </button>
+
+            <div className="pt-2 text-center text-xs text-slate-400">
+              {isRegisterMode ? (
+                <p>
+                  Already have an account?{' '}
+                  <button onClick={() => setIsRegisterMode(false)} className="text-brand-500 font-extrabold hover:underline">
+                    Sign in
+                  </button>
+                </p>
+              ) : (
+                <p>
+                  Don't have an account?{' '}
+                  <button onClick={() => setIsRegisterMode(true)} className="text-brand-500 font-extrabold hover:underline">
+                    Sign up
+                  </button>
+                </p>
+              )}
+            </div>
+
+          </div>
+        )}
+
+        {/* DEDICATED ADMIN / OPERATOR LOGIN CARD */}
+        {loginPortal === 'admin' && (
+          <div className="w-full max-w-md saas-card p-8 sm:p-10 space-y-6 shadow-2xl relative my-auto border border-amber-500/30 bg-gradient-to-b from-[#111827] via-[#111827] to-amber-950/20">
+            
+            <div className="text-center space-y-1">
+              <div className="w-10 h-10 bg-amber-500/10 text-amber-400 border border-amber-500/30 rounded-2xl flex items-center justify-center mx-auto mb-2">
+                <ShieldAlert className="w-5 h-5" />
+              </div>
+              <h2 className="text-2xl font-black text-white">
+                Printing Shop Operator
+              </h2>
+              <p className="text-xs text-amber-400 font-medium">
+                Admin Spooler & Management Portal
+              </p>
+            </div>
+
+            {(authError || passcodeError) && (
+              <div className="p-3.5 bg-rose-500/10 border border-rose-500/20 rounded-xl text-xs text-rose-300 flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 shrink-0" />
+                <span>{passcodeError || authError}</span>
               </div>
             )}
 
-            {/* Remember me checkbox */}
-            <div className="flex items-center gap-2 pt-1">
-              <input
-                type="checkbox"
-                id="remember"
-                checked={rememberMe}
-                onChange={(e) => setRememberMe(e.target.checked)}
-                className="w-4 h-4 accent-brand-500 rounded bg-[#111827] border-slate-700 cursor-pointer"
-              />
-              <label htmlFor="remember" className="text-xs font-semibold text-slate-400 cursor-pointer select-none">
-                Remember me
-              </label>
+            {/* Admin Login Form */}
+            <form onSubmit={handleSubmit} className="space-y-4 text-left">
+              
+              {isRegisterMode && (
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 mb-1.5">Operator Name</label>
+                  <div className="relative">
+                    <User className="w-4 h-4 text-slate-500 absolute left-3.5 top-3.5" />
+                    <input
+                      type="text"
+                      required
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder="Master Printer Admin"
+                      className="w-full text-xs pl-10 pr-4 py-3 bg-[#111827] border border-[#232d3f] rounded-xl text-white outline-none focus:border-amber-500"
+                    />
+                  </div>
+                </div>
+              )}
+
+              <div>
+                <label className="block text-xs font-bold text-slate-300 mb-1.5">Admin Email</label>
+                <div className="relative">
+                  <Mail className="w-4 h-4 text-slate-500 absolute left-3.5 top-3.5" />
+                  <input
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="admin@printf.com"
+                    className="w-full text-xs pl-10 pr-4 py-3 bg-[#111827] border border-[#232d3f] rounded-xl text-white outline-none focus:border-amber-500"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-300 mb-1.5">Admin Password</label>
+                <div className="relative">
+                  <Lock className="w-4 h-4 text-slate-500 absolute left-3.5 top-3.5" />
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="w-full text-xs pl-10 pr-10 py-3 bg-[#111827] border border-[#232d3f] rounded-xl text-white outline-none focus:border-amber-500"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3.5 top-3.5 text-slate-500 hover:text-slate-300"
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+
+              {isRegisterMode && (
+                <div>
+                  <label className="block text-xs font-bold text-amber-400 mb-1.5">Admin Security Passcode *</label>
+                  <input
+                    type="password"
+                    required
+                    value={adminPasscode}
+                    onChange={(e) => setAdminPasscode(e.target.value)}
+                    placeholder="Enter operator passcode (admin123)"
+                    className="w-full text-xs p-3 bg-[#111827] border border-amber-500/40 rounded-xl text-white outline-none focus:border-amber-400"
+                  />
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full py-3.5 text-sm font-extrabold text-slate-950 bg-amber-400 hover:bg-amber-300 rounded-xl shadow-lg shadow-amber-500/20 transition-all flex items-center justify-center gap-2"
+              >
+                {loading ? (
+                  <span className="animate-pulse">Authenticating Admin...</span>
+                ) : isRegisterMode ? (
+                  <span>Register Operator Account</span>
+                ) : (
+                  <span>Login as Operator Admin</span>
+                )}
+              </button>
+            </form>
+
+            <div className="pt-2 text-center text-xs text-slate-400">
+              {isRegisterMode ? (
+                <p>
+                  Existing operator account?{' '}
+                  <button onClick={() => setIsRegisterMode(false)} className="text-amber-400 font-extrabold hover:underline">
+                    Sign in
+                  </button>
+                </p>
+              ) : (
+                <p>
+                  New shop operator?{' '}
+                  <button onClick={() => setIsRegisterMode(true)} className="text-amber-400 font-extrabold hover:underline">
+                    Register operator account
+                  </button>
+                </p>
+              )}
             </div>
 
-            {/* Submit Login Button matching screenshot */}
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-3.5 text-sm font-extrabold text-white bg-brand-500 hover:bg-brand-600 rounded-xl shadow-purple-glow transition-all flex items-center justify-center gap-2"
-            >
-              {loading ? (
-                <span className="animate-pulse">Authenticating with Supabase...</span>
-              ) : isRegisterMode ? (
-                <span>Create Account</span>
-              ) : (
-                <span>Login</span>
-              )}
-            </button>
-          </form>
-
-          {/* Divider */}
-          <div className="relative my-4 text-center text-xs text-slate-500">
-            <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-[#232d3f]" /></div>
-            <span className="relative bg-[#161e2e] px-3 font-semibold">or continue with</span>
           </div>
-
-          {/* Google Auth Button */}
-          <button
-            onClick={handleGoogleAuth}
-            className="w-full py-3 border border-[#232d3f] bg-[#111827] hover:bg-[#1d273a] rounded-xl text-xs font-bold text-slate-200 flex items-center justify-center gap-2.5 transition-all"
-          >
-            <svg className="w-4 h-4" viewBox="0 0 24 24">
-              <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-              <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
-              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
-            </svg>
-            <span>Continue with Google</span>
-          </button>
-
-          {/* Toggle Register / Login */}
-          <div className="pt-2 text-center text-xs text-slate-400">
-            {isRegisterMode ? (
-              <p>
-                Already have an account?{' '}
-                <button onClick={() => setIsRegisterMode(false)} className="text-brand-500 font-extrabold hover:underline">
-                  Sign in
-                </button>
-              </p>
-            ) : (
-              <p>
-                Don't have an account?{' '}
-                <button onClick={() => setIsRegisterMode(true)} className="text-brand-500 font-extrabold hover:underline">
-                  Sign up
-                </button>
-              </p>
-            )}
-          </div>
-
-        </div>
+        )}
 
         {/* Footer */}
         <div className="text-center text-[11px] text-slate-500 pt-6">
@@ -320,3 +469,5 @@ export const LoginPage = ({ onLoginSuccess, onOpenSupabaseModal }) => {
     </div>
   );
 };
+
+

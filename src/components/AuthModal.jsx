@@ -11,15 +11,22 @@ export const AuthModal = ({ isOpen, onClose }) => {
   const [password, setPassword] = useState('');
   const [phone, setPhone] = useState('');
   const [role, setRole] = useState('customer');
+  const [adminPasscode, setAdminPasscode] = useState('');
+  const [passcodeError, setPasscodeError] = useState('');
 
   if (!isOpen) return null;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setPasscodeError('');
     try {
       if (mode === 'login') {
         await login(email, password);
       } else {
+        if (role === 'admin' && adminPasscode !== 'admin123' && adminPasscode !== 'PRINTF_ADMIN_2026') {
+          setPasscodeError('Invalid Admin Passcode! Operator key required.');
+          return;
+        }
         await register({ name, email, password, phone, role });
       }
       onClose();
@@ -56,9 +63,9 @@ export const AuthModal = ({ isOpen, onClose }) => {
           </p>
         </div>
 
-        {authError && (
+        {(authError || passcodeError) && (
           <div className="mb-4 p-3 bg-rose-500/10 border border-rose-500/20 rounded-xl text-xs text-rose-400">
-            {authError}
+            {passcodeError || authError}
           </div>
         )}
 
@@ -137,6 +144,20 @@ export const AuthModal = ({ isOpen, onClose }) => {
                   <option value="admin">Printing Operator / Admin Account</option>
                 </select>
               </div>
+
+              {role === 'admin' && (
+                <div>
+                  <label className="block text-xs font-semibold text-amber-400 mb-1">Admin Security Passcode *</label>
+                  <input
+                    type="password"
+                    required
+                    value={adminPasscode}
+                    onChange={(e) => setAdminPasscode(e.target.value)}
+                    placeholder="Enter operator passcode"
+                    className="w-full text-xs p-2.5 bg-slate-950 border border-amber-500/40 rounded-xl text-slate-100 outline-none focus:border-amber-400"
+                  />
+                </div>
+              )}
             </>
           )}
 

@@ -2,8 +2,8 @@ import React from 'react';
 import { Bell, ChevronDown, Sparkles, User, ShieldAlert, Zap, Menu, Printer } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
-export const HeaderBar = ({ onOpenAuthModal, onOpenSupabaseModal, onToggleMobileMenu }) => {
-  const { currentUser, switchRole, isSupabaseActive } = useAuth();
+export const HeaderBar = ({ onOpenAuthModal, onToggleMobileMenu }) => {
+  const { currentUser, switchRole } = useAuth();
 
   return (
     <header className="h-16 sm:h-20 bg-[#111827] border-b border-[#232d3f] px-4 sm:px-8 flex items-center justify-between sticky top-0 z-30">
@@ -27,40 +27,26 @@ export const HeaderBar = ({ onOpenAuthModal, onOpenSupabaseModal, onToggleMobile
           <span className="text-lg font-black tracking-tight text-white">Printf<span className="text-brand-500">.</span></span>
         </div>
 
-        {/* Quick Role Switcher (Hidden on tiny screens or condensed) */}
-        <div className="hidden sm:flex items-center gap-2">
-          <span className="text-xs font-semibold text-slate-400 hidden md:flex items-center gap-1.5">
-            <Sparkles className="w-3.5 h-3.5 text-brand-500" /> Mode:
+        {/* Role Badge Indicator */}
+        <div className="flex items-center gap-2">
+          <span className={`px-3.5 py-1.5 rounded-full text-xs font-black tracking-wide uppercase flex items-center gap-2 border transition-all ${
+            currentUser?.role === 'admin'
+              ? 'bg-amber-500/15 text-amber-300 border-amber-500/40 shadow-lg shadow-amber-500/20'
+              : 'bg-brand-500/15 text-brand-300 border-brand-500/40 shadow-purple-glow'
+          }`}>
+            {currentUser?.role === 'admin' ? (
+              <>
+                <ShieldAlert className="w-4 h-4 text-amber-400 animate-pulse" />
+                <span>Operator Mode</span>
+              </>
+            ) : (
+              <>
+                <User className="w-4 h-4 text-brand-400" />
+                <span>Customer Mode</span>
+              </>
+            )}
           </span>
-          <div className="flex items-center bg-[#161e2e] p-1 rounded-xl border border-[#232d3f]">
-            <button
-              onClick={() => switchRole('customer')}
-              className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1 ${
-                currentUser?.role === 'customer'
-                  ? 'bg-brand-500 text-white shadow-sm'
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              <User className="w-3 h-3" /> Customer
-            </button>
-            <button
-              onClick={() => switchRole('admin')}
-              className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1 ${
-                currentUser?.role === 'admin'
-                  ? 'bg-amber-500 text-white shadow-sm'
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              <ShieldAlert className="w-3 h-3" /> Admin
-            </button>
-          </div>
         </div>
-
-        {isSupabaseActive && (
-          <span className="hidden xl:flex px-2.5 py-1 text-[11px] font-bold bg-emerald-500/10 text-emerald-400 rounded-full items-center gap-1 border border-emerald-500/30">
-            <Zap className="w-3 h-3 fill-current" /> Live
-          </span>
-        )}
       </div>
 
       {/* Right User Actions */}
