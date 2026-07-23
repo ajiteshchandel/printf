@@ -1,5 +1,5 @@
 import React, { useState, Suspense, lazy } from 'react';
-import { useNavigate, Navigate } from 'react-router-dom';
+import { useNavigate, Navigate, Link } from 'react-router-dom';
 import { 
   Printer, 
   Mail, 
@@ -243,7 +243,7 @@ export const AdminLoginPage = () => {
             </button>
           </form>
 
-          <div className="pt-2 text-center text-xs text-slate-400">
+          <div className="pt-2 text-center text-xs text-slate-400 space-y-2">
             {isRegisterMode ? (
               <p>
                 Existing operator account?{' '}
@@ -259,6 +259,13 @@ export const AdminLoginPage = () => {
                 </button>
               </p>
             )}
+
+            <div className="pt-2 border-t border-slate-800 text-slate-400">
+              Looking for Customer Sign In?{' '}
+              <Link to="/login" className="text-brand-400 font-extrabold hover:underline inline-flex items-center gap-1">
+                Customer Sign In &rarr;
+              </Link>
+            </div>
           </div>
 
         </div>

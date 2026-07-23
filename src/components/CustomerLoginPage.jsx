@@ -266,7 +266,7 @@ export const CustomerLoginPage = () => {
             <span>Continue with Google</span>
           </button>
 
-          <div className="pt-2 text-center text-xs text-slate-400">
+          <div className="pt-2 text-center text-xs text-slate-400 space-y-2">
             {isRegisterMode ? (
               <p>
                 Already have an account?{' '}
@@ -282,6 +282,13 @@ export const CustomerLoginPage = () => {
                 </button>
               </p>
             )}
+
+            <div className="pt-2 border-t border-[#232d3f] text-slate-400">
+              Are you a Shop Operator?{' '}
+              <Link to="/admin/login" className="text-amber-400 font-extrabold hover:underline inline-flex items-center gap-1">
+                Admin Portal &rarr;
+              </Link>
+            </div>
           </div>
 
         </div>
