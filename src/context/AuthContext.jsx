@@ -10,14 +10,7 @@ export const AuthProvider = ({ children }) => {
     if (saved) {
       try { return JSON.parse(saved); } catch (e) {}
     }
-    return {
-      id: 'user_customer_demo',
-      name: 'Alex Johnson',
-      email: 'customer@printf.com',
-      phone: '+1 (555) 234-5678',
-      role: 'customer',
-      createdAt: new Date().toISOString()
-    };
+    return null;
   });
   
   const [loading, setLoading] = useState(false);

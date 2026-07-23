@@ -51,80 +51,94 @@ export const Sidebar = ({ activeTab, setActiveTab, onOpenUploadModal, onOpenSupa
 
         {/* Navigation Menu */}
         <nav className="space-y-1.5">
-          <button
-            onClick={() => handleNavClick('dashboard')}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-xs font-bold transition-all ${
-              activeTab === 'dashboard'
-                ? 'sidebar-item-active'
-                : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
-            }`}
-          >
-            <LayoutDashboard className="w-4 h-4" />
-            <span>Dashboard</span>
-          </button>
-
-          <button
-            onClick={() => {
-              if (setMobileOpen) setMobileOpen(false);
-              onOpenUploadModal();
-            }}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-xs font-bold text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all"
-          >
-            <UploadCloud className="w-4 h-4 text-brand-500" />
-            <span>Upload Document</span>
-          </button>
-
-          <button
-            onClick={() => handleNavClick('my_orders')}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-xs font-bold transition-all ${
-              activeTab === 'my_orders'
-                ? 'sidebar-item-active'
-                : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
-            }`}
-          >
-            <FileText className="w-4 h-4" />
-            <span>My Orders</span>
-          </button>
-
-          {currentUser?.role === 'admin' && (
+          {currentUser?.role === 'admin' ? (
             <>
               <button
                 onClick={() => handleNavClick('admin_operator')}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-xs font-bold transition-all ${
                   activeTab === 'admin_operator'
-                    ? 'sidebar-item-active'
+                    ? 'sidebar-item-active text-amber-300'
                     : 'text-amber-400 hover:bg-amber-500/10'
                 }`}
               >
                 <ShieldAlert className="w-4 h-4 text-amber-400" />
                 <span>Operator Terminal</span>
               </button>
+
+              <button
+                onClick={() => handleNavClick('support')}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-xs font-bold transition-all ${
+                  activeTab === 'support'
+                    ? 'sidebar-item-active'
+                    : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
+                }`}
+              >
+                <HelpCircle className="w-4 h-4" />
+                <span>Operator Support</span>
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                onClick={() => handleNavClick('dashboard')}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-xs font-bold transition-all ${
+                  activeTab === 'dashboard'
+                    ? 'sidebar-item-active'
+                    : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
+                }`}
+              >
+                <LayoutDashboard className="w-4 h-4" />
+                <span>Dashboard</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  if (setMobileOpen) setMobileOpen(false);
+                  onOpenUploadModal();
+                }}
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-xs font-bold text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all"
+              >
+                <UploadCloud className="w-4 h-4 text-brand-500" />
+                <span>Upload Document</span>
+              </button>
+
+              <button
+                onClick={() => handleNavClick('my_orders')}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-xs font-bold transition-all ${
+                  activeTab === 'my_orders'
+                    ? 'sidebar-item-active'
+                    : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
+                }`}
+              >
+                <FileText className="w-4 h-4" />
+                <span>My Orders</span>
+              </button>
+
+              <button
+                onClick={() => handleNavClick('profile')}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-xs font-bold transition-all ${
+                  activeTab === 'profile'
+                    ? 'sidebar-item-active'
+                    : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
+                }`}
+              >
+                <User className="w-4 h-4" />
+                <span>Profile</span>
+              </button>
+
+              <button
+                onClick={() => handleNavClick('support')}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-xs font-bold transition-all ${
+                  activeTab === 'support'
+                    ? 'sidebar-item-active'
+                    : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
+                }`}
+              >
+                <HelpCircle className="w-4 h-4" />
+                <span>Support</span>
+              </button>
             </>
           )}
-
-          <button
-            onClick={() => handleNavClick('profile')}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-xs font-bold transition-all ${
-              activeTab === 'profile'
-                ? 'sidebar-item-active'
-                : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
-            }`}
-          >
-            <User className="w-4 h-4" />
-            <span>Profile</span>
-          </button>
-
-          <button
-            onClick={() => handleNavClick('support')}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-xs font-bold transition-all ${
-              activeTab === 'support'
-                ? 'sidebar-item-active'
-                : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
-            }`}
-          >
-            <HelpCircle className="w-4 h-4" />
-            <span>Support</span>
-          </button>
         </nav>
       </div>
 
